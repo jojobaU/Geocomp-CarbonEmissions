@@ -15,4 +15,3 @@ spVerse packages: ggmap, rgeo, rgdal, maptools, dplyr, tdyr, tmap
 Data Classes
   - Data Frame: TCE, TCE_1, TCE_data, TCE_data_1
   - Spatial data: lnd
-
