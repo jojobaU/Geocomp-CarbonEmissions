@@ -15,3 +15,6 @@ spVerse packages: ggmap, rgeo, rgdal, maptools, dplyr, tdyr, tmap
 Data Classes
   - Data Frame: TCE, TCE_1, TCE_data, TCE_data_1
   - Spatial data: lnd
+
+# Link to HTML Doc with complete project
+[Geocomp Project HTML Doc](https://www.dropbox.com/s/5mjn4uutbalo962/Geocomp-TCE.html?dl=0)
