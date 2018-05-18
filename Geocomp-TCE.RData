@@ -1,0 +1,130 @@
+# Geocomputation with spatial data
+# Attribute Joins!
+library(rgdal)
+lnd <- readOGR("data/london_sport.shp")
+plot(lnd)
+nrow(lnd)
+
+# New Join (addition of TCE for 2012 into lnd database)
+TCE_data<- read.csv("data/london-borough-profiles-2014.csv",
+                    stringsAsFactors = FALSE) # TCE = Total Carbon Emissions
+head(TCE_data$Total.carbon.emissions..2012.) # info about tce
+
+# Get rid of commas and convert to numeric
+TCE_data$Total.carbon.emissions..2012. <- gsub(",","", TCE_data$Total.carbon.emissions..2012.)
+Carbon_Emissions_12 <- as.numeric(TCE_data$Total.carbon.emissions..2012.)
+
+Borough <- as.factor(TCE_data$Area.name)
+
+# Aggregate total carbon emissions to districts
+TCE <- aggregate(Carbon_Emissions_12 ~ Borough, FUN = sum, data = TCE_data)
+head(TCE, 2)
+
+# check to see if related variables run true
+lnd$name %in% TCE$Borough
+
+#load dplyr package
+library(dplyr) 
+
+head(lnd$name)
+head(TCE$Borough)
+
+# join data and print map
+lnd@data <- left_join(lnd@data, TCE, by = c('name'= 'Borough'))
+library(tmap)
+qtm(lnd, "Carbon_Emissions_12")
+tmap_mode("view")
+
+# tmap section
+# install the CRAN version of tmap
+library(tmap)
+vignette("tmap-nutshell")
+qtm(shp = lnd, fill = "Carbon_Emissions_12", fill.palette = "Blues")
+
+# Create a series of maps using tm_facets command
+tm_shape(lnd) +
+  tm_fill("Carbon_Emissions_12", thres.poly = 0) +
+  tm_facets("name", free.coords = TRUE, drop.units = TRUE)
+
+# create tmap (leaflet) of london with color segmentation by carbon emissions levels (2012)
+lnd_wgs = spTransform(lnd, CRS("+init=epsg:4326")) # convert to london CRS
+if(curl::has_internet()) {
+  osm_tiles = tmaptools::read_osm(bbox(lnd_wgs)) # download images from OSM
+  tm_shape(osm_tiles) + tm_raster() +
+    tm_shape(lnd_wgs) +
+    tm_fill("Carbon_Emissions_12", fill.title = "Total Carbon Emissions, 2012", scale = 0.8, alpha = 0.5) +
+    tm_layout(legend.position = c(1, 0.08)) 
+} else {
+  tm_shape(lnd_wgs) +
+    tm_fill("Carbon_Emissions_12", fill.title = "Total Carbon Emissions, 2012", scale = 0.8, alpha = 0.5) +
+    tm_layout(legend.position = c(1, 0.08))
+}
+tmap_mode("view")
+
+
+# New Join 2 (addition of TCE for 2014 into lnd database)
+TCE_data_1<- read.csv("data/london-borough-profiles2014.csv",
+                    stringsAsFactors = FALSE) # TCE = Total Carbon Emissions
+head(TCE_data_1$Total_carbon_emissions_.2014.) # info about tce
+
+# Convert to numeric
+Carbon_Emissions_14<- as.numeric(TCE_data_1$Total_carbon_emissions_.2014.)
+
+Borough_14 <- as.factor(TCE_data_1$Area_name)
+
+# Aggregate total carbon emissions to districts
+TCE_1 <- aggregate(Carbon_Emissions_14 ~ Borough_14, FUN = sum, data = TCE_data_1)
+head(TCE_1, 2)
+
+# check to see if related variables run true
+lnd$name %in% TCE_1$Borough_14
+TCE$Borough %in% TCE_1$Borough_14
+
+
+# Delete rows which do not match
+TCE <- TCE[-c(20, 29), ]
+
+#load dplyr package
+library(dplyr) 
+
+head(lnd$name)
+head(TCE_1$Borough_14)
+
+# join data and print map
+lnd@data <- left_join(lnd@data, TCE_1, by = c('name'= 'Borough_14'))
+library(tmap)
+qtm(lnd, "Carbon_Emissions_14")
+tmap_mode("view")
+
+# combine data from TCE_1 to TCE
+TCE <- cbind(TCE, TCE_1$Carbon_Emissions_14)
+colnames(TCE) <- c("Borough", "TCE_12", "TCE_14")
+
+# tmap
+# install the CRAN version of tmap
+library(tmap)
+vignette("tmap-nutshell")
+qtm(shp = lnd, fill = "Carbon_Emissions_14", fill.palette = "Blues")
+
+# Create a series of maps using tm_facets command
+tm_shape(lnd) +
+  tm_fill("Carbon_Emissions_14", thres.poly = 0) +
+  tm_facets("name", free.coords = TRUE, drop.units = TRUE)
+
+# create tmap (leaflet) of london with color segmentation by carbon emissions levels (2014)
+lnd_wgs = spTransform(lnd, CRS("+init=epsg:4326")) # convert to london CRS
+if(curl::has_internet()) {
+  osm_tiles = tmaptools::read_osm(bbox(lnd_wgs)) # download images from OSM
+  tm_shape(osm_tiles) + tm_raster(palette = "Blues") +
+    tm_shape(lnd_wgs) +
+    tm_fill("Carbon_Emissions_14", fill.title = "Total Carbon Emissions, 2014", scale = 0.8, alpha = 0.5) +
+    tm_layout(legend.position = c(1, 0.08)) 
+} else {
+  tm_shape(lnd_wgs) +
+    tm_fill("Carbon_Emissions_14", fill.title = "Total Carbon Emissions, 2014", scale = 0.8, alpha = 0.5) +
+    tm_layout(legend.position = c(1, 0.08))
+}
+tmap_mode("view")
+
+# 終わり
+
