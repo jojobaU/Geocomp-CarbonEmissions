@@ -17,4 +17,4 @@ Data Classes
   - Spatial data: lnd
 
 # Link to HTML Doc with complete project
-[Geocomp Project HTML Doc](https://www.dropbox.com/s/5mjn4uutbalo962/Geocomp-TCE.html?dl=0)
+[Geocomp Project HTML Doc](http://rpubs.com/jojobaU/geocomp)
